@@ -1,30 +1,30 @@
 /**
  * LED Controller App
- * Home Screen Component (Firebase Version)
+ * Home Screen Component (React Native Firebase Version)
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  Text, 
-  Switch, 
-  TouchableOpacity, 
-  ScrollView, 
+import {
+  View,
+  StyleSheet,
+  Text,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
   SafeAreaView,
   ActivityIndicator,
   Alert
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { 
-  getDeviceId, 
-  getDeviceInfo, 
-  getLEDSettings, 
-  updateLEDSettings, 
-  forgetDevice, 
-  getAllDevices, 
-  subscribeLEDSettings, 
-  subscribeDeviceStatus 
+import {
+  getDeviceId,
+  getDeviceInfo,
+  getLEDSettings,
+  updateLEDSettings,
+  forgetDevice,
+  getAllDevices,
+  subscribeLEDSettings,
+  subscribeDeviceStatus
 } from '../services/firebaseApi';
 import ColorSwatch from '../components/ColorSwatch';
 import ColorPicker from '../components/ColorPicker';
@@ -52,7 +52,7 @@ const HomeScreen = ({ route, navigation }) => {
   const [deviceName, setDeviceName] = useState('LED Controller');
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   // LED settings
   const [isOn, setIsOn] = useState(false);
   const [brightness, setBrightness] = useState(255);
@@ -65,12 +65,12 @@ const HomeScreen = ({ route, navigation }) => {
 
   // Always use Firebase real-time updates
   const [isRealTimeEnabled] = useState(true);
-  
+
   // Set up real-time subscriptions when using Firebase
   useEffect(() => {
     let settingsUnsubscribe = null;
     let statusUnsubscribe = null;
-    
+
     const setupSubscriptions = async () => {
       if (isRealTimeEnabled && deviceId) {
         // Subscribe to LED settings changes
@@ -83,13 +83,13 @@ const HomeScreen = ({ route, navigation }) => {
             setRed(settings.red);
             setGreen(settings.green);
             setBlue(settings.blue);
-            
+
             // Convert RGB to hex
             const hex = rgbToHex(settings.red, settings.green, settings.blue);
             setColor(hex);
           }
         });
-        
+
         // Subscribe to device status changes
         statusUnsubscribe = await subscribeDeviceStatus(deviceId, (status) => {
           if (status) {
@@ -98,9 +98,9 @@ const HomeScreen = ({ route, navigation }) => {
         });
       }
     };
-    
+
     setupSubscriptions();
-    
+
     // Clean up subscriptions when component unmounts or deviceId/mode changes
     return () => {
       if (settingsUnsubscribe) settingsUnsubscribe();
@@ -116,13 +116,13 @@ const HomeScreen = ({ route, navigation }) => {
         if (!deviceId) {
           const allDevices = await getAllDevices();
           console.log(allDevices);
-          
+
           if (!allDevices || allDevices.length === 0) {
             // No devices found, go to setup
             navigation.replace('Setup');
             return;
           }
-          
+
           const storedDeviceId = allDevices[0].device_id;
           if (!storedDeviceId) {
             // No device registered, go to setup
@@ -159,7 +159,7 @@ const HomeScreen = ({ route, navigation }) => {
   // Refresh LED settings from server
   const refreshLEDSettings = async () => {
     if (!deviceId) return;
-    
+
     try {
       const settings = await getLEDSettings(deviceId);
       console.log(settings)
@@ -171,7 +171,7 @@ const HomeScreen = ({ route, navigation }) => {
         setRed(settings.red);
         setGreen(settings.green);
         setBlue(settings.blue);
-        
+
         // Convert RGB to hex
         const hex = rgbToHex(settings.red, settings.green, settings.blue);
         setColor(hex);
@@ -184,7 +184,7 @@ const HomeScreen = ({ route, navigation }) => {
   // Update LED settings to server
   const saveLEDSettings = async () => {
     if (!deviceId) return;
-    
+
     setIsUpdating(true);
     try {
       const settings = {
@@ -196,9 +196,9 @@ const HomeScreen = ({ route, navigation }) => {
         green,
         blue
       };
-      
+
       const success = await updateLEDSettings(deviceId, settings);
-      
+
       if (!success) {
         throw new Error('Failed to update LED settings');
       }
@@ -217,7 +217,7 @@ const HomeScreen = ({ route, navigation }) => {
   // Handle color change from swatch or picker
   const handleColorChange = (selectedColor, r = null, g = null, b = null) => {
     setColor(selectedColor);
-    
+
     // If RGB values are provided directly, use them
     if (r !== null && g !== null && b !== null) {
       setRed(r);
@@ -230,13 +230,14 @@ const HomeScreen = ({ route, navigation }) => {
       setGreen(rgb.g);
       setBlue(rgb.b);
     }
-    
+
     // Update server with new settings
     saveLEDSettings();
   };
 
   // Handle power toggle
   const handlePowerToggle = (value) => {
+    console.log(value)
     setIsOn(value);
     saveLEDSettings();
   };
@@ -336,7 +337,7 @@ const HomeScreen = ({ route, navigation }) => {
             />
           </View>
         </View>
-        
+
         {/* Main content area - using a regular View instead of ScrollView to avoid nesting issues */}
         <View style={styles.contentContainer}>
           {/* Show controls only if power is on */}
@@ -360,13 +361,13 @@ const HomeScreen = ({ route, navigation }) => {
                   />
                 </View>
               </View>
-              
+
               {/* Lighting modes */}
               <LightingModes
                 selectedMode={mode}
                 onSelectMode={handleModeChange}
               />
-              
+
               {/* Animation speed (only for non-solid modes) */}
               {mode !== 'solid' && (
                 <View style={styles.controlSection}>
@@ -387,7 +388,7 @@ const HomeScreen = ({ route, navigation }) => {
                   </View>
                 </View>
               )}
-              
+
               {/* Color selection (not used for rainbow mode) */}
               {mode !== 'rainbow' && (
                 <>
@@ -396,7 +397,7 @@ const HomeScreen = ({ route, navigation }) => {
                     selectedColor={color}
                     onSelectColor={handleColorChange}
                   />
-                  
+
                   <ColorPicker
                     color={color}
                     onColorChange={handleColorChange}
@@ -405,7 +406,7 @@ const HomeScreen = ({ route, navigation }) => {
               )}
             </>
           )}
-          
+
           {/* Connection status indicator */}
           <View style={styles.realtimeContainer}>
             <View style={[styles.statusDot, { backgroundColor: '#4CAF50' }]} />
@@ -413,7 +414,7 @@ const HomeScreen = ({ route, navigation }) => {
               Connected to Firebase
             </Text>
           </View>
-          
+
           {/* Footer with update status and forget device button */}
           <View style={styles.footer}>
             {isUpdating && (
@@ -422,7 +423,7 @@ const HomeScreen = ({ route, navigation }) => {
                 <Text style={styles.updateText}>Updating...</Text>
               </View>
             )}
-            
+
             <TouchableOpacity
               style={styles.forgetButton}
               onPress={handleForgetDevice}

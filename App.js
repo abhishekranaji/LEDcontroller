@@ -1,6 +1,6 @@
 /**
  * LED Controller App
- * Main Application Component (Firebase Version)
+ * Main Application Component (React Native Firebase Version)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -10,9 +10,8 @@ import { Alert, ActivityIndicator, View, StyleSheet, TouchableOpacity, Text } fr
 import HomeScreen from './screens/HomeScreen';
 import SetupScreen from './screens/SetupScreen';
 import LoginScreen from './screens/LoginScreen';
-// Import Firebase configuration and auth
+// Import Firebase configuration and auth using React Native Firebase
 import app, { auth, database } from './firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
 
 // Create navigation stack
 const Stack = createStackNavigator();
@@ -65,7 +64,7 @@ const AppStack = () => {
 const LogoutButton = ({ navigation }) => {
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await auth().signOut();
       // The AuthState listener will handle navigation
     } catch (error) {
       console.error('Logout error:', error);
@@ -90,13 +89,13 @@ export default function App() {
 
   // Handle auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const subscriber = auth().onAuthStateChanged((user) => {
       setUser(user);
       if (initializing) setInitializing(false);
     });
 
     // Cleanup subscription
-    return unsubscribe;
+    return subscriber;
   }, [initializing]);
 
   // Check Firebase configuration on app start
@@ -104,11 +103,10 @@ export default function App() {
     const checkFirebaseConfig = async () => {
       try {
         // Check if Firebase is properly configured
-        const config = app.options;
         const isDefaultConfig = 
-          !config.apiKey || 
-          !config.databaseURL || 
-          !config.projectId;
+          !app.options.apiKey || 
+          !app.options.databaseURL || 
+          !app.options.projectId;
         
         if (isDefaultConfig) {
           // Alert user if Firebase is not configured

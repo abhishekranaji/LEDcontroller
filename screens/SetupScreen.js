@@ -1,6 +1,6 @@
 /**
  * LED Controller App
- * Setup Screen Component (Firebase Version)
+ * Setup Screen Component (React Native Firebase Version)
  */
 
 import React from 'react';

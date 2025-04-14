@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "541382355786",
+    "firebase_url": "https://emmor-4b494-default-rtdb.firebaseio.com",
+    "project_id": "emmor-4b494",
+    "storage_bucket": "emmor-4b494.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541382355786:android:960bc24ba33710315a2fb3",
+        "android_client_info": {
+          "package_name": "com.emmor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoNnpXk9hYkjiwVIgM2b-lJ5guhcPWgwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
