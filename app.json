@@ -1,6 +1,6 @@
 {
-  "name": "LedController",
-  "displayName": "LedController",
+  "name": "Emmor Controller",
+  "displayName": "Emmor Controller",
   "version": "1.0.0",
   "permissions": [
     "ACCESS_FINE_LOCATION",
