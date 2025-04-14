@@ -35,7 +35,8 @@
     "@react-native-community/cli": "latest",
     "@react-native/codegen": "^0.79.0",
     "@react-native/metro-config": "^0.79.0",
-    "metro-react-native-babel-preset": "^0.76.0"
+    "metro-react-native-babel-preset": "^0.76.0",
+    "react-native-dotenv": "^3.4.11"
   },
   "private": true
 }

@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   ScrollView
 } from 'react-native';
-import { findDevicesInSetupMode, registerDevice } from '../services/api';
+import { findDevicesInSetupMode, registerDevice } from '../services/firebaseApi';
 import WifiManager from 'react-native-wifi-reborn';
 
 function WiFiConfig({ onDeviceRegistered }) {

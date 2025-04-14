@@ -1,12 +1,12 @@
 /**
  * LED Controller App
- * Setup Screen Component
+ * Setup Screen Component (Firebase Version)
  */
 
 import React from 'react';
 import { View, StyleSheet, Text, ScrollView, SafeAreaView } from 'react-native';
 import WiFiConfig from '../components/WiFiConfig';
-import { saveDeviceId } from '../services/api';
+import { saveDeviceId, registerDevice } from '../services/firebaseApi';
 
 const SetupScreen = ({ navigation }) => {
   // Handle device registration completion

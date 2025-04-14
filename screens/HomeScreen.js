@@ -1,6 +1,6 @@
 /**
  * LED Controller App
- * Home Screen Component
+ * Home Screen Component (Firebase Version)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,7 +16,16 @@ import {
   Alert
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { getDeviceId, getDeviceInfo, getLEDSettings, updateLEDSettings, forgetDevice, getAllDevices } from '../services/api';
+import { 
+  getDeviceId, 
+  getDeviceInfo, 
+  getLEDSettings, 
+  updateLEDSettings, 
+  forgetDevice, 
+  getAllDevices, 
+  subscribeLEDSettings, 
+  subscribeDeviceStatus 
+} from '../services/firebaseApi';
 import ColorSwatch from '../components/ColorSwatch';
 import ColorPicker from '../components/ColorPicker';
 import LightingModes from '../components/LightingModes';
@@ -54,15 +63,66 @@ const HomeScreen = ({ route, navigation }) => {
   const [green, setGreen] = useState(255);
   const [blue, setBlue] = useState(255);
 
+  // Always use Firebase real-time updates
+  const [isRealTimeEnabled] = useState(true);
+  
+  // Set up real-time subscriptions when using Firebase
+  useEffect(() => {
+    let settingsUnsubscribe = null;
+    let statusUnsubscribe = null;
+    
+    const setupSubscriptions = async () => {
+      if (isRealTimeEnabled && deviceId) {
+        // Subscribe to LED settings changes
+        settingsUnsubscribe = await subscribeLEDSettings(deviceId, (settings) => {
+          if (settings) {
+            setIsOn(settings.is_on);
+            setBrightness(settings.brightness);
+            setMode(settings.mode);
+            setSpeed(settings.speed);
+            setRed(settings.red);
+            setGreen(settings.green);
+            setBlue(settings.blue);
+            
+            // Convert RGB to hex
+            const hex = rgbToHex(settings.red, settings.green, settings.blue);
+            setColor(hex);
+          }
+        });
+        
+        // Subscribe to device status changes
+        statusUnsubscribe = await subscribeDeviceStatus(deviceId, (status) => {
+          if (status) {
+            setDeviceName(status.name || 'LED Controller');
+          }
+        });
+      }
+    };
+    
+    setupSubscriptions();
+    
+    // Clean up subscriptions when component unmounts or deviceId/mode changes
+    return () => {
+      if (settingsUnsubscribe) settingsUnsubscribe();
+      if (statusUnsubscribe) statusUnsubscribe();
+    };
+  }, [deviceId, isRealTimeEnabled]);
+
   // Load device ID on initial render
   useEffect(() => {
-    navigation.replace('Setup');
     const loadDevice = async () => {
       try {
         // If no device ID passed from setup, check local storage
         if (!deviceId) {
           const allDevices = await getAllDevices();
-          console.log(allDevices)
+          console.log(allDevices);
+          
+          if (!allDevices || allDevices.length === 0) {
+            // No devices found, go to setup
+            navigation.replace('Setup');
+            return;
+          }
+          
           const storedDeviceId = allDevices[0].device_id;
           if (!storedDeviceId) {
             // No device registered, go to setup
@@ -74,7 +134,7 @@ const HomeScreen = ({ route, navigation }) => {
 
         // Load device info
         const deviceInfo = await getDeviceInfo(deviceId);
-        console.log(deviceInfo)
+        console.log(deviceInfo);
         if (deviceInfo) {
           setDeviceName(deviceInfo.name || 'LED Controller');
         }
@@ -346,6 +406,14 @@ const HomeScreen = ({ route, navigation }) => {
             </>
           )}
           
+          {/* Connection status indicator */}
+          <View style={styles.realtimeContainer}>
+            <View style={[styles.statusDot, { backgroundColor: '#4CAF50' }]} />
+            <Text style={styles.realtimeText}>
+              Connected to Firebase
+            </Text>
+          </View>
+          
           {/* Footer with update status and forget device button */}
           <View style={styles.footer}>
             {isUpdating && (
@@ -435,6 +503,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 14,
     color: '#555',
+  },
+  realtimeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+    padding: 8,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 16,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  realtimeText: {
+    fontSize: 14,
+    color: '#4a4a4a',
   },
   footer: {
     marginTop: 20,
